@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Finanzas Personal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #121016;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 1.5rem;
+    color: #f3e8ee;
+    min-height: 100vh;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1.2rem;
+    background: rgba(28, 22, 34, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(244, 114, 182, 0.15);
+    border-radius: 16px;
+    padding: 0.8rem 1.2rem;
+  }
+
+  .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .titulo { font-size: 1.1rem; font-weight: 700; color: #fdf2f8; letter-spacing: -0.01em; }
+  .mes-nav { display: flex; align-items: center; gap: 8px; }
+
+  .btn-mes {
+    background: rgba(45, 30, 48, 0.7);
+    border: 1px solid rgba(244, 114, 182, 0.25);
+    border-radius: 8px;
+    color: #fdf2f8;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-mes:hover { background: rgba(244, 114, 182, 0.2); border-color: rgba(244, 114, 182, 0.4); }
+
+  .nav-links { display: flex; gap: 8px; }
+  .btn-nav {
+    background: rgba(244, 114, 182, 0.12);
+    border: 1px solid rgba(244, 114, 182, 0.35);
+    border-radius: 8px;
+    color: #fbcfe8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-nav:hover { background: rgba(244, 114, 182, 0.25); border-color: #f472b6; color: #fff; }
+
+  .btn-logout {
+    background: rgba(251, 113, 133, 0.12);
+    border: 1px solid rgba(251, 113, 133, 0.35);
+    border-radius: 8px;
+    color: #fda4af;
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-logout:hover { background: rgba(251, 113, 133, 0.25); border-color: #fb7185; color: #fff; }
+
+  .mes-actual { font-size: 0.9rem; font-weight: 600; color: #f472b6; min-width: 120px; text-align: center; }
+  .sync-status { font-size: 0.72rem; color: #9d8ba2; text-align: right; margin-bottom: 1rem; }
+  .sync-status.ok { color: #f472b6; }
+  .sync-status.err { color: #fb7185; }
+
+  .layout { display: grid; grid-template-columns: 170px 1fr; gap: 14px; align-items: start; }
+  .cards-col { display: flex; flex-direction: column; gap: 8px; }
+  .main-col { min-width: 0; }
+
+  .card {
+    background: rgba(28, 22, 34, 0.75);
+    border: 1px solid rgba(244, 114, 182, 0.15);
+    border-radius: 14px;
+    padding: 0.75rem 0.9rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+  .card-label { font-size: 0.68rem; color: #fda4af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; opacity: 0.8; }
+  .card-valor { font-size: 1rem; font-weight: 700; }
+  .card-valor.pos { color: #f472b6; }
+  .card-valor.neg { color: #fb7185; }
+  .card-valor.neu { color: #e8d5e5; }
+  .card-sub { font-size: 0.7rem; color: #b39db2; margin-top: 3px; }
+
+  .barra-wrap {
+    background: rgba(28, 22, 34, 0.75);
+    border: 1px solid rgba(244, 114, 182, 0.15);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  .barra-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #e8d5e5; margin-bottom: 8px; }
+  .barra-track { background: rgba(45, 30, 48, 0.8); border-radius: 8px; height: 12px; overflow: hidden; border: 1px solid rgba(244, 114, 182, 0.1); }
+  .barra-fill { height: 100%; border-radius: 8px; background: linear-gradient(to right, #f472b6, #fb7185); transition: width 0.6s; }
+  .barra-pie { display:flex; justify-content:space-between; gap:8px; margin-top:6px; font-size:0.7rem; color:#b39db2; flex-wrap: wrap; }
+
+  .alertas { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.2rem; }
+  .alerta { border-radius: 10px; padding: 0.65rem 1rem; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+  .alerta.warn { background: rgba(251, 146, 60, 0.12); border-left: 3px solid #fb923c; color: #fdba74; }
+  .alerta.danger { background: rgba(251, 113, 133, 0.12); border-left: 3px solid #fb7185; color: #fca5a5; }
+  .alerta.ok { background: rgba(244, 114, 182, 0.12); border-left: 3px solid #f472b6; color: #fbcfe8; }
+
+  .sec-titulo { font-size: 0.75rem; font-weight: 600; color: #f472b6; text-transform: uppercase; letter-spacing: 0.08em; margin: 1.2rem 0 0.6rem; opacity: 0.9; }
+
+  .chart-wrap {
+    background: rgba(28, 22, 34, 0.75);
+    border: 1px solid rgba(244, 114, 182, 0.15);
+    border-radius: 14px;
+    padding: 1.2rem;
+    margin-bottom: 1.2rem;
+    overflow-x: auto;
+  }
+  .chart-inner { min-width: 400px; }
+  svg text { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+  .leyenda { display: flex; gap: 1rem; margin-top: 0.8rem; flex-wrap: wrap; }
+  .ley-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #b39db2; }
+  .ley-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .header { flex-wrap: wrap; margin-bottom: 1rem; }
+  .nav-links { flex-wrap: wrap; gap: 6px; }
+  .btn-nav { background: rgba(244,114,182,0.08); border-color: rgba(244,114,182,0.25); }
+  .btn-nav.activo { background: rgba(244,114,182,0.28); border-color: #f472b6; color: #fff; pointer-events: none; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 0.4rem; }
+
+  @media (max-width: 720px) {
+    body { padding: 1rem; }
+    .header { flex-wrap: wrap; }
+    .layout { grid-template-columns: 1fr; }
+    .cards-col { display: grid; grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="titulo">📊 Dashboard</div>
+    <div class="header-actions">
+      <nav class="nav-links">
+        <a class="btn-nav activo" href="dashboard.html" aria-current="page">📊 Dashboard</a>
+        <a class="btn-nav" href="gastos.html">💸 Gastos</a>
+        <a class="btn-nav" href="finanzas.html">🌸 Finanzas</a>
+      </nav>
+      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="toolbar">
+    <div class="mes-nav">
+      <button class="btn-mes" id="btn-prev" aria-label="Mes anterior">‹</button>
+      <div class="mes-actual" id="mes-label"></div>
+      <button class="btn-mes" id="btn-next" aria-label="Mes siguiente">›</button>
+    </div>
+  </div>
+  <div class="sync-status" id="sync-status">Cargando…</div>
+
+<div class="layout">
+  <div class="cards-col" id="cards-resumen"></div>
+
+  <div class="main-col">
+    <div class="barra-wrap">
+      <div class="barra-label"><span>Gasto real vs ingreso</span><span id="pct-txt">0%</span></div>
+      <div class="barra-track"><div class="barra-fill" id="barra-global" style="width:0%"></div></div>
+      <div class="barra-pie"><span id="barra-left">—</span><span id="barra-right">—</span></div>
+    </div>
+
+    <div class="sec-titulo">⚠️ Alertas</div>
+    <div class="alertas" id="alertas"></div>
+
+    <div class="sec-titulo">Evolución últimos 6 meses</div>
+    <div class="chart-wrap">
+      <div class="chart-inner">
+        <svg id="chart-svg" width="100%" viewBox="0 0 600 140"></svg>
+      </div>
+      <div class="leyenda">
+        <div class="ley-item"><div class="ley-dot" style="background:#f472b6"></div>Ingresos</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#a78bfa"></div>Presupuestado</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#fb7185"></div>Gastado real</div>
+      </div>
+    </div>
+
+    <div class="sec-titulo">Por categoría</div>
+    <div class="chart-wrap">
+      <div class="chart-inner">
+        <svg id="chart-cat" width="100%" viewBox="0 0 600 200"></svg>
+      </div>
+      <div class="leyenda">
+        <div class="ley-item"><div class="ley-dot" style="background:#a78bfa"></div>Presupuestado</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#f472b6"></div>Gastado real</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOQcAM_qUgsr2SiDO4ZJtHSHJP25g0GSA",
+  authDomain: "finanzas-personal-12490.firebaseapp.com",
+  projectId: "finanzas-personal-12490",
+  storageBucket: "finanzas-personal-12490.firebasestorage.app",
+  messagingSenderId: "1062344169400",
+  appId: "1:1062344169400:web:75075634e2d4a416b3614d"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+const ALLOWED_EMAIL = 'plagosh1@gmail.com';
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// Los conceptos del presupuesto (montos, nombres y notas) viven en Firestore: config/conceptos.
+// Así no quedan escritos en el código público de GitHub.
+let CONCEPTOS_DEF = {};
+let conceptosCargados = false;
+async function cargarConceptos() {
+  const snap = await getDoc(doc(db, 'config', 'conceptos'));
+  CONCEPTOS_DEF = snap.exists() ? (snap.data().def || {}) : {};
+  conceptosCargados = true;
+  return snap.exists();
+}
+
+const CATEGORIAS_DEFAULT = [
+  { key: 'deudas', label: 'Deudas', color: '#fb7185' },
+  { key: 'hogar', label: 'Hogar', color: '#f472b6' },
+  { key: 'mascotas', label: 'Mascotas', color: '#a78bfa' },
+  { key: 'transporte', label: 'Transporte', color: '#38bdf8' },
+  { key: 'salud', label: 'Salud', color: '#4ade80' },
+  { key: 'suscripciones', label: 'Suscripciones', color: '#facc15' },
+  { key: 'variables', label: 'Variables', color: '#fb923c' }
+];
+
+const hoy = new Date();
+let mesIdx = hoy.getMonth();
+let anio   = hoy.getFullYear();
+let categoriasLive = null;   // se carga una sola vez por sesión
+let renderId = 0;            // evita que un render viejo pise a uno nuevo
+
+// ---------- utilidades ----------
+const conceptosDe = catKey => CONCEPTOS_DEF[catKey] || [];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString('es-CL');
+const fmtSigno = n => (n < 0 ? '−' : '') + fmt(n);
+function fmtCorto(n) {
+  n = Math.abs(n);
+  if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
+  if (n >= 1e3) return Math.round(n/1e3) + 'k';
+  return String(Math.round(n));
+}
+const pct = (num, den) => den > 0 ? (num/den*100).toFixed(1) + '%' : '—';
+const mesKey = (y,m) => `${y}-${String(m+1).padStart(2,'0')}`;
+const esPasado = (y,m) => y < hoy.getFullYear() || (y === hoy.getFullYear() && m < hoy.getMonth());
+
+function setSyncStatus(msg, cls='') {
+  const el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className = 'sync-status ' + cls;
+}
+
+// ---------- datos ----------
+async function cargarCategoriasLive() {
+  if (categoriasLive) return;
+  try {
+    const snap = await getDocs(collection(db, 'categorias'));
+    categoriasLive = snap.empty
+      ? CATEGORIAS_DEFAULT
+      : snap.docs.map(d => ({ key: d.data().key || d.id, label: d.data().label || d.id, color: d.data().color || '#f472b6' }));
+  } catch (e) {
+    console.warn('No se pudieron cargar categorías, uso las por defecto:', e);
+    categoriasLive = CATEGORIAS_DEFAULT;
+  }
+}
+
+function categoriasParaMes(d, y, m) {
+  if (esPasado(y,m) && d?.categoriasSnapshot?.length) return d.categoriasSnapshot;
+  return categoriasLive?.length ? categoriasLive : CATEGORIAS_DEFAULT;
+}
+
+function totalIngresos(d = {}) {
+  if (d.ingresosList?.length) return d.ingresosList.reduce((a,i) => a + (Number(i.monto) || 0), 0);
+  if (typeof d.ingresos === 'number' && d.ingresos > 0) return d.ingresos;
+  return 0;
+}
+
+function calcPresupuestoCat(cat, d = {}) {
+  let total = 0;
+  conceptosDe(cat.key).forEach(con => { total += d.overrides?.[cat.key]?.[con.id] ?? con.monto; });
+  (d.custom || []).filter(s => s.catKey === cat.key)
+    .forEach(s => { total += d.overrides?.[s.catKey]?.[s.id] ?? s.monto; });
+  return total;
+}
+
+const calcPresupuesto = (d, y, m) =>
+  categoriasParaMes(d, y, m).reduce((a, cat) => a + calcPresupuestoCat(cat, d), 0);
+
+// Los errores SE PROPAGAN: antes un permiso denegado mostraba $0 con "✓ Actualizado".
+async function cargarMes(y, m) {
+  const snap = await getDoc(doc(db, 'finanzas', `presupuesto_${y}_${m}`));
+  return snap.exists() ? snap.data() : {};
+}
+
+async function cargarGastos(y, m) {
+  const porCat = {};
+  let total = 0;
+  const snap = await getDocs(query(collection(db, 'gastos'), where('mesKey', '==', mesKey(y,m))));
+  snap.forEach(d => {
+    const g = d.data();
+    const monto = Number(g.monto) || 0;
+    if (g.catKey) { porCat[g.catKey] = (porCat[g.catKey] || 0) + monto; total += monto; }
+  });
+  return { porCat, total };
+}
+
+// ---------- render ----------
+async function render() {
+  const id = ++renderId;
+  setSyncStatus('Cargando…');
+  document.getElementById('mes-label').textContent = MESES[mesIdx] + ' ' + anio;
+
+  try {
+    if (!conceptosCargados && !(await cargarConceptos())) {
+      setSyncStatus('Faltan los conceptos del presupuesto: ábrelos primero en Finanzas', 'err');
+    }
+    await cargarCategoriasLive();
+
+    // meses a cargar: los 6 del gráfico (el último es el mes actual)
+    const meses6 = [];
+    for (let i = 5; i >= 0; i--) {
+      let m = mesIdx - i, y = anio;
+      if (m < 0) { m += 12; y--; }
+      meses6.push({ m, y });
+    }
+    const cargados = await Promise.all(meses6.map(async ({m, y}) => {
+      const [md, gastos] = await Promise.all([cargarMes(y, m), cargarGastos(y, m)]);
+      return { m, y, md, gastos };
+    }));
+
+    if (id !== renderId) return; // el usuario ya cambió de mes
+
+    const actual = cargados[cargados.length - 1];
+    renderMes(actual.md, actual.gastos);
+    renderEvolucion(cargados);
+    if (Object.keys(CONCEPTOS_DEF).length) setSyncStatus('✓ Actualizado', 'ok');
+  } catch (e) {
+    if (id !== renderId) return;
+    console.error(e);
+    const msg = e.code === 'permission-denied'
+      ? 'Sin permiso para leer los datos (revisa las reglas de Firestore)'
+      : 'Error al cargar: ' + (e.code || e.message);
+    setSyncStatus(msg, 'err');
+  }
+}
+
+function renderMes(mesData, { porCat, total: totalReal }) {
+  const catsActuales = categoriasParaMes(mesData, anio, mesIdx);
+  const ing = totalIngresos(mesData);
+  const totalPresup = calcPresupuesto(mesData, anio, mesIdx);
+  const balPresup = ing - totalPresup;
+  const balReal   = ing - totalReal;
+  const diff      = totalReal - totalPresup;
+
+  // Cards
+  const cards = [
+    { label:'Ingresos',         valor:fmt(ing),           cls:'neu', sub: ing > 0 ? '100%' : 'sin registrar' },
+    { label:'Presupuestado',    valor:fmt(totalPresup),   cls:'neu', sub: pct(totalPresup, ing) + ' del ingreso' },
+    { label:'Gastado real',     valor:fmt(totalReal),     cls: ing > 0 && totalReal > ing ? 'neg' : 'neu', sub: pct(totalReal, ing) + ' del ingreso' },
+    { label:'Balance estimado', valor:fmtSigno(balPresup), cls: balPresup >= 0 ? 'pos' : 'neg', sub: balPresup >= 0 ? 'disponible' : 'déficit' },
+    { label:'Balance real',     valor:fmtSigno(balReal),   cls: balReal >= 0 ? 'pos' : 'neg',   sub: balReal >= 0 ? 'disponible' : 'déficit' },
+    { label:'Diferencia',       valor:(diff > 0 ? '+' : diff < 0 ? '−' : '') + fmt(diff), cls: diff <= 0 ? 'pos' : 'neg', sub: diff <= 0 ? 'bajo presupuesto' : 'sobre presupuesto' },
+  ];
+  document.getElementById('cards-resumen').innerHTML = cards.map(c =>
+    `<div class="card"><div class="card-label">${c.label}</div><div class="card-valor ${c.cls}">${c.valor}</div><div class="card-sub">${c.sub}</div></div>`
+  ).join('');
+
+  // Barra global
+  const pctU = ing > 0 ? Math.min(totalReal / ing * 100, 100) : 0;
+  document.getElementById('barra-global').style.width = pctU + '%';
+  document.getElementById('pct-txt').textContent = ing > 0 ? (totalReal / ing * 100).toFixed(1) + '% usado' : 'sin ingresos registrados';
+  document.getElementById('barra-left').textContent = balReal >= 0 ? `Quedan ${fmt(balReal)}` : `Déficit ${fmt(balReal)}`;
+  document.getElementById('barra-right').textContent = `Real: ${fmt(totalReal)} / Presup: ${fmt(totalPresup)}`;
+
+  // Alertas
+  const alertas = [];
+  catsActuales.forEach(cat => {
+    const presup = calcPresupuestoCat(cat, mesData);
+    const real   = porCat[cat.key] || 0;
+    const label  = esc(cat.label);
+    if (presup === 0 && real === 0) return;
+    if (presup === 0 && real > 0) {
+      alertas.push({ tipo:'warn', msg:`${label}: ${fmt(real)} gastado sin presupuesto asignado` });
+      return;
+    }
+    const p = real / presup;
+    if (p > 1)
+      alertas.push({ tipo:'danger', msg:`${label}: ${fmt(real)} gastado vs ${fmt(presup)} presupuestado (+${((p-1)*100).toFixed(0)}% sobre presupuesto)` });
+    else if (p > 0.85)
+      alertas.push({ tipo:'warn', msg:`${label}: ${fmt(real)} de ${fmt(presup)} — ${(p*100).toFixed(0)}% usado, cerca del límite` });
+  });
+  if (totalPresup > 0 && diff > 0 && diff / totalPresup > 0.1)
+    alertas.unshift({ tipo:'warn', msg:`Gasto real supera presupuesto en ${fmt(diff)} (${(diff/totalPresup*100).toFixed(1)}%)` });
+  if (ing > 0 && balReal < 0)
+    alertas.unshift({ tipo:'danger', msg:`Déficit real de ${fmt(balReal)} este mes` });
+  if (ing === 0 && totalReal > 0)
+    alertas.unshift({ tipo:'warn', msg:'Hay gastos registrados pero no ingresos este mes' });
+  if (!alertas.length)
+    alertas.push({ tipo:'ok', msg:'Todo dentro del presupuesto este mes ✓' });
+  document.getElementById('alertas').innerHTML = alertas.map(a => `<div class="alerta ${a.tipo}">${a.msg}</div>`).join('');
+
+  // Gráfico por categoría
+  const svgCat = document.getElementById('chart-cat');
+  const catsConDatos = catsActuales.filter(cat => calcPresupuestoCat(cat, mesData) > 0 || (porCat[cat.key] || 0) > 0);
+  const CW=600, CH=200, cpadL=45, cpadR=10, cpadT=14, cpadB=40;
+  const chartCW = CW - cpadL - cpadR, chartCH = CH - cpadT - cpadB;
+
+  if (!catsConDatos.length) {
+    svgCat.innerHTML = `<text x="${CW/2}" y="${CH/2}" text-anchor="middle" font-size="11" fill="#b39db2">Sin datos para este mes</text>`;
+  } else {
+    const maxCatVal = Math.max(...catsConDatos.flatMap(cat => [calcPresupuestoCat(cat, mesData), porCat[cat.key] || 0]), 1);
+    const grupW = chartCW / catsConDatos.length;
+    const barW = Math.min(grupW * 0.35, 18);
+    const gap = barW * 0.4;
+    let s = '';
+
+    [0.25, 0.5, 0.75, 1].forEach(f => {
+      const yv = cpadT + chartCH - f * chartCH;
+      s += `<line x1="${cpadL}" y1="${yv.toFixed(1)}" x2="${CW-cpadR}" y2="${yv.toFixed(1)}" stroke="rgba(244,114,182,0.15)" stroke-width="1"/>`;
+      s += `<text x="${cpadL-4}" y="${(yv+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#b39db2">${fmtCorto(maxCatVal*f)}</text>`;
+    });
+
+    catsConDatos.forEach((cat, i) => {
+      const presup = calcPresupuestoCat(cat, mesData);
+      const real   = porCat[cat.key] || 0;
+      const cx     = cpadL + i * grupW + grupW / 2;
+      const hP     = presup / maxCatVal * chartCH;
+      const hR     = real / maxCatVal * chartCH;
+      const colorR = real > presup ? '#fb7185' : '#f472b6';
+      const xP     = cx - gap/2 - barW;
+      const xR     = cx + gap/2;
+
+      s += `<rect x="${xP.toFixed(1)}" y="${(cpadT+chartCH-hP).toFixed(1)}" width="${barW}" height="${hP.toFixed(1)}" fill="#a78bfa" rx="2" opacity="0.75"><title>${esc(cat.label)} presupuestado: ${fmt(presup)}</title></rect>`;
+      s += `<rect x="${xR.toFixed(1)}" y="${(cpadT+chartCH-hR).toFixed(1)}" width="${barW}" height="${hR.toFixed(1)}" fill="${colorR}" rx="2"><title>${esc(cat.label)} real: ${fmt(real)}</title></rect>`;
+      s += `<text x="${cx.toFixed(1)}" y="${(cpadT+chartCH+12).toFixed(1)}" text-anchor="middle" font-size="8" fill="#b39db2">${esc(cat.label.split(' ')[0].slice(0,10))}</text>`;
+      if (real > 0)
+        s += `<text x="${(xR+barW/2).toFixed(1)}" y="${(cpadT+chartCH-hR-3).toFixed(1)}" text-anchor="middle" font-size="7" fill="${colorR}">${fmtCorto(real)}</text>`;
+    });
+
+    s += `<line x1="${cpadL}" y1="${cpadT+chartCH}" x2="${CW-cpadR}" y2="${cpadT+chartCH}" stroke="rgba(244,114,182,0.25)" stroke-width="1"/>`;
+    svgCat.innerHTML = s;
+  }
+}
+
+function renderEvolucion(cargados) {
+  const datos6 = cargados.map(({m, y, md, gastos}) => ({
+    label: MESES[m].slice(0,3),
+    ing: totalIngresos(md),
+    presup: calcPresupuesto(md, y, m),
+    real: gastos.total
+  }));
+
+  const W=600, H=140, padL=45, padR=10, padT=10, padB=25;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const maxY = Math.max(...datos6.flatMap(d => [d.ing, d.presup, d.real]), 1);
+  const x = i => padL + i * (chartW / (datos6.length - 1));
+  const y = v => padT + chartH - (v / maxY) * chartH;
+
+  const linea = (vals, color, nombre, dash='') =>
+    `<polyline points="${vals.map((v,i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2" ${dash ? `stroke-dasharray="${dash}"` : ''}/>` +
+    vals.map((v,i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${color}"><title>${nombre} ${datos6[i].label}: ${fmt(v)}</title></circle>`).join('');
+
+  const ejes = datos6.map((d,i) =>
+    `<text x="${x(i).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9" fill="#b39db2">${d.label}</text>`).join('');
+
+  const gridY = [0.25, 0.5, 0.75, 1].map(f => {
+    const yv = padT + chartH - f * chartH;
+    return `<line x1="${padL}" y1="${yv.toFixed(1)}" x2="${W-padR}" y2="${yv.toFixed(1)}" stroke="rgba(244,114,182,0.15)" stroke-width="1"/>` +
+           `<text x="${padL-4}" y="${(yv+3).toFixed(1)}" text-anchor="end" font-size="8" fill="#b39db2">${fmtCorto(maxY*f)}</text>`;
+  }).join('');
+
+  document.getElementById('chart-svg').innerHTML = gridY + ejes +
+    linea(datos6.map(d => d.ing),    '#f472b6', 'Ingresos') +
+    linea(datos6.map(d => d.presup), '#a78bfa', 'Presupuestado', '4 2') +
+    linea(datos6.map(d => d.real),   '#fb7185', 'Gastado');
+}
+
+// ---------- eventos ----------
+document.getElementById('btn-prev').addEventListener('click', () => { mesIdx--; if (mesIdx < 0) { mesIdx = 11; anio--; } render(); });
+document.getElementById('btn-next').addEventListener('click', () => { mesIdx++; if (mesIdx > 11) { mesIdx = 0; anio++; } render(); });
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  try { await signOut(auth); } finally { window.location.href = 'index.html'; }
+});
+
+onAuthStateChanged(auth, async user => {
+  if (user && user.email === ALLOWED_EMAIL) {
+    render();
+  } else {
+    // Si entró otra cuenta de Google, se cierra su sesión para no crear un bucle con index.html
+    if (user) { try { await signOut(auth); } catch (e) {} }
+    window.location.href = 'index.html';
+  }
+});
+</script>
+</body>
+</html>

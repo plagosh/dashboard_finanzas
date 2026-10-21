@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Finanzas Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body { 
+    background: #121016; 
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; 
+    min-height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 1.5rem;
+    color: #f3e8ee;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Contenedor de pétalos para toda la pantalla */
+  .sakura-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  /* Estilo de los pétalos de flor de cerezo */
+  .petal {
+    position: absolute;
+    background: linear-gradient(135deg, #fbcfe8, #f472b6);
+    border-radius: 150% 0 150% 0;
+    opacity: 0.75;
+    pointer-events: none;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% {
+      top: -10%;
+      transform: translateX(0) rotate(0deg) scale(0.8);
+      opacity: 0.85;
+    }
+    50% {
+      transform: translateX(35px) rotate(180deg) scale(1);
+    }
+    100% {
+      top: 110%;
+      transform: translateX(-20px) rotate(360deg) scale(0.5);
+      opacity: 0.15;
+    }
+  }
+
+  /* Tarjeta central sobre los pétalos */
+  .login-card { 
+    position: relative;
+    z-index: 2;
+    background: rgba(28, 22, 34, 0.75); 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(244, 114, 182, 0.2);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(244, 114, 182, 0.08);
+    text-align: center;
+  }
+
+  .titulo { 
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    color: #fdf2f8;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitulo { 
+    font-size: 0.88rem; 
+    color: #fda4af; 
+    opacity: 0.85;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .btn-google { 
+    width: 100%;
+    background: rgba(45, 30, 48, 0.85); 
+    border: 1px solid rgba(244, 114, 182, 0.3); 
+    border-radius: 14px; 
+    color: #fdf2f8; 
+    font-size: 0.95rem; 
+    font-weight: 600; 
+    padding: 0.9rem 1.25rem; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 12px; 
+    transition: all 0.25s ease; 
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  }
+
+  .btn-google:hover { 
+    background: rgba(65, 40, 70, 0.95); 
+    border-color: rgba(244, 114, 182, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 114, 182, 0.2);
+  }
+
+  .btn-google:active {
+    transform: translateY(0);
+  }
+
+  .status { 
+    font-size: 0.82rem; 
+    margin-top: 1.25rem;
+    min-height: 1.2rem; 
+    line-height: 1.4;
+  }
+  
+  .status.ok { color: #f472b6; }
+  .status.err { color: #fb7185; }
+</style>
+</head>
+<body>
+
+<!-- Pantalla completa con lluvia de Sakura -->
+<div class="sakura-bg" id="sakuraBg"></div>
+
+<div class="login-card">
+  <h1 class="titulo">Finanzas Personal</h1>
+  <p class="subtitulo">Inicia sesión una vez para acceder a tu panel de control</p>
+  
+  <button class="btn-google" id="btn-login">
+    <svg width="18" height="18" viewBox="0 0 48 48">
+      <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/>
+      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.1 18.9 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5l-6.2-5.2C29.4 35.6 26.8 36 24 36c-5.2 0-9.6-2.9-11.3-7.1l-6.5 5C9.5 39.5 16.2 44 24 44z"/>
+      <path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.5l6.2 5.2C41 35.3 44 30 44 24c0-1.3-.1-2.7-.4-4z"/>
+    </svg>
+    Continuar con Google
+  </button>
+  
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+  // Generador de pétalos cayendo en toda la pantalla
+  const sakuraBg = document.getElementById('sakuraBg');
+  function createPetal() {
+    if (!sakuraBg) return;
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    const size = Math.random() * 10 + 8;
+    petal.style.width = `${size}px`;
+    petal.style.height = `${size * 1.3}px`;
+    petal.style.left = `${Math.random() * 100}%`;
+    petal.style.animationDuration = `${Math.random() * 4 + 4}s`;
+    sakuraBg.appendChild(petal);
+
+    setTimeout(() => {
+      petal.remove();
+    }, 8000);
+  }
+  setInterval(createPetal, 200);
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  onAuthStateChanged, 
+  signOut 
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOQcAM_qUgsr2SiDO4ZJtHSHJP25g0GSA",
+  authDomain: "finanzas-personal-12490.firebaseapp.com",
+  projectId: "finanzas-personal-12490",
+  storageBucket: "finanzas-personal-12490.firebasestorage.app",
+  messagingSenderId: "1062344169400",
+  appId: "1:1062344169400:web:75075634e2d4a416b3614d"
+};
+
+const app      = initializeApp(firebaseConfig);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' }); // Fuerza la selección limpia de cuenta
+
+const ALLOWED_EMAIL = 'plagosh1@gmail.com';
+
+function setStatus(msg, cls='') { 
+  const el = document.getElementById('status'); 
+  if (el) {
+    el.textContent = msg; 
+    el.className = 'status ' + cls; 
+  }
+}
+
+// Configurar acción del botón
+const btn = document.getElementById('btn-login');
+if (btn) {
+  btn.onclick = () => {
+    setStatus('Iniciando sesión...', 'ok');
+    signInWithPopup(auth, provider)
+      .then(result => {
+        if (result.user.email !== ALLOWED_EMAIL) {
+          signOut(auth);
+          setStatus('Cuenta no autorizada', 'err');
+        } else {
+          setStatus('✓ Sesión activa. Redirigiendo...', 'ok');
+          window.location.href = 'dashboard.html';
+        }
+      })
+      .catch(e => {
+        if (e.code === 'auth/popup-closed-by-user') {
+          setStatus('');
+        } else {
+          setStatus('Error: ' + e.message, 'err');
+        }
+      });
+  };
+}
+
+// Verificar sesión existente al cargar la página
+onAuthStateChanged(auth, user => {
+  if (user && user.email === ALLOWED_EMAIL) {
+    setStatus('✓ Sesión activa. Redirigiendo...', 'ok');
+    window.location.href = 'dashboard.html';
+  }
+});
+</script>
+
+</body>
+</html>
