@@ -154,9 +154,9 @@
     <div class="titulo">📊 Dashboard</div>
     <div class="header-actions">
       <nav class="nav-links">
-        <a class="btn-nav activo" href="dashboard.html" aria-current="page">📊 Dashboard</a>
-        <a class="btn-nav" href="gastos.html">💸 Gastos</a>
-        <a class="btn-nav" href="finanzas.html">🌸 Finanzas</a>
+        <a class="btn-nav activo" href="dashboard" aria-current="page">📊 Dashboard</a>
+        <a class="btn-nav" href="gastos">💸 Gastos</a>
+        <a class="btn-nav" href="finanzas">🌸 Finanzas</a>
       </nav>
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
@@ -304,7 +304,10 @@ function totalIngresos(d = {}) {
 
 function calcPresupuestoCat(cat, d = {}) {
   let total = 0;
-  conceptosDe(cat.key).forEach(con => { total += d.overrides?.[cat.key]?.[con.id] ?? con.monto; });
+  conceptosDe(cat.key).forEach(con => {
+    if ((d.ocultos || []).includes(con.id)) return; // oculto este mes: no se presupuesta
+    total += d.overrides?.[cat.key]?.[con.id] ?? con.monto;
+  });
   (d.custom || []).filter(s => s.catKey === cat.key)
     .forEach(s => { total += d.overrides?.[s.catKey]?.[s.id] ?? s.monto; });
   return total;
@@ -507,7 +510,7 @@ document.getElementById('btn-prev').addEventListener('click', () => { mesIdx--; 
 document.getElementById('btn-next').addEventListener('click', () => { mesIdx++; if (mesIdx > 11) { mesIdx = 0; anio++; } render(); });
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
-  try { await signOut(auth); } finally { window.location.href = 'index.html'; }
+  try { await signOut(auth); } finally { window.location.href = './'; }
 });
 
 onAuthStateChanged(auth, async user => {
@@ -516,7 +519,7 @@ onAuthStateChanged(auth, async user => {
   } else {
     // Si entró otra cuenta de Google, se cierra su sesión para no crear un bucle con index.html
     if (user) { try { await signOut(auth); } catch (e) {} }
-    window.location.href = 'index.html';
+    window.location.href = './';
   }
 });
 </script>

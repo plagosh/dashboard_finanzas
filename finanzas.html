@@ -131,9 +131,9 @@ input[type="date"] { color-scheme:dark; }
     <div class="titulo">🌸 Finanzas</div>
     <div class="header-actions">
       <nav class="nav-links">
-        <a class="btn-nav" href="dashboard.html">📊 Dashboard</a>
-        <a class="btn-nav" href="gastos.html">💸 Gastos</a>
-        <a class="btn-nav activo" href="finanzas.html" aria-current="page">🌸 Finanzas</a>
+        <a class="btn-nav" href="dashboard">📊 Dashboard</a>
+        <a class="btn-nav" href="gastos">💸 Gastos</a>
+        <a class="btn-nav activo" href="finanzas" aria-current="page">🌸 Finanzas</a>
       </nav>
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
@@ -231,7 +231,7 @@ function protegerPagina(alEntrar) {
       if (!iniciado) { iniciado = true; alEntrar(); }
     } else {
       if (user) { try { await signOut(getAuth(app)); } catch (e) {} }
-      window.location.href = 'index.html';
+      window.location.href = './';
     }
   });
 }
@@ -344,7 +344,7 @@ function montoBase(catKey,id) { return conceptosDe(catKey).find(c=>c.id===id)?.m
 function getMonto(catKey,id)  { return mesData.overrides?.[catKey]?.[id]??montoBase(catKey,id); }
 function getMontoCustom(sub)  { return mesData.overrides?.[sub.catKey]?.[sub.id]??sub.monto; }
 function getTotalCat(catKey) {
-  return conceptosDe(catKey).reduce((a,c)=>a+getMonto(catKey,c.id),0)+(mesData.custom||[]).filter(s=>s.catKey===catKey).reduce((a,s)=>a+getMontoCustom(s),0);
+  return conceptosDe(catKey).filter(c=>!mesData.ocultos?.includes(c.id)).reduce((a,c)=>a+getMonto(catKey,c.id),0)+(mesData.custom||[]).filter(s=>s.catKey===catKey).reduce((a,s)=>a+getMontoCustom(s),0);
 }
 function fmt(n) { return '$'+Math.round(Math.abs(n)).toLocaleString('es-CL'); }
 
@@ -633,7 +633,7 @@ function render() {
         document.getElementById(`nota-${con.id}`).textContent=newNota;
         editForm.classList.remove('open');
       });
-      btnDel.addEventListener('click',async e=>{ e.stopPropagation(); if(!confirm(`¿Ocultar "${labelGuardado}" este mes?`)) return; if(!mesData.ocultos) mesData.ocultos=[]; if(!mesData.ocultos.includes(con.id)) mesData.ocultos.push(con.id); await guardarMes(); item.style.display='none'; });
+      btnDel.addEventListener('click',async e=>{ e.stopPropagation(); if(!confirm(`¿Ocultar "${labelGuardado}" este mes?`)) return; if(!mesData.ocultos) mesData.ocultos=[]; if(!mesData.ocultos.includes(con.id)) mesData.ocultos.push(con.id); await guardarMes(); render(); });
     });
 
     (mesData.custom||[]).filter(s=>s.catKey===cat.key).forEach(sub=>{
@@ -782,7 +782,7 @@ document.getElementById('btn-importar').addEventListener('click', async () => {
 
 // Cerrar sesión (igual en las 3 páginas)
 document.getElementById('btn-logout').addEventListener('click', async () => {
-  try { await signOut(getAuth(app)); } catch (e) {} finally { window.location.href = 'index.html'; }
+  try { await signOut(getAuth(app)); } catch (e) {} finally { window.location.href = './'; }
 });
 </script>
 </body>
