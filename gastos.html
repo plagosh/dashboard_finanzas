@@ -92,6 +92,22 @@ select.inp { appearance:none; cursor:pointer; }
 .filtros-activos { font-size:0.72rem; color:#f472b6; margin:-0.3rem 0 0.6rem; display:none; }
 .filtros-activos.show { display:block; }
 .filtros-activos button { background:none; border:none; color:#fb7185; font-size:0.72rem; cursor:pointer; text-decoration:underline; margin-left:6px; font-family:inherit; }
+
+/* Dos columnas: la de listados ocupa 1/3 */
+.wrap { max-width:1280px; }
+.cols { display:grid; gap:18px; align-items:start; }
+.cols > div { min-width:0; }
+.cols-gastos { grid-template-columns:2fr 1fr; }
+.cols-finanzas { grid-template-columns:1fr 2fr; }
+.cols > div > .seccion-titulo:first-child { margin-top:0; }
+@media (max-width:900px) { .cols-gastos, .cols-finanzas { grid-template-columns:1fr; } }
+.col-lista .filtros, .col-lista .gasto-edit-grid { grid-template-columns:1fr; }
+.col-lista .gasto-item { display:grid; grid-template-columns:8px 1fr auto auto; column-gap:10px; row-gap:4px; align-items:center; }
+.col-lista .gasto-dot { grid-row:1; grid-column:1; }
+.col-lista .gasto-info { grid-row:1; grid-column:2 / 5; }
+.col-lista .gasto-monto { grid-row:2; grid-column:2; }
+.col-lista .btn-edit-gasto { grid-row:2; grid-column:3; }
+.col-lista .btn-del-gasto { grid-row:2; grid-column:4; }
 @media (max-width:560px) { .form-grid, .gasto-edit-grid, .filtros { grid-template-columns:1fr; } }
 </style>
 </head>
@@ -101,9 +117,9 @@ select.inp { appearance:none; cursor:pointer; }
     <div class="titulo">💸 Gastos</div>
     <div class="header-actions">
       <nav class="nav-links">
-        <a class="btn-nav" href="dashboard.html">📊 Dashboard</a>
-        <a class="btn-nav activo" href="gastos.html" aria-current="page">💸 Gastos</a>
-        <a class="btn-nav" href="finanzas.html">🌸 Finanzas</a>
+        <a class="btn-nav" href="dashboard">📊 Dashboard</a>
+        <a class="btn-nav activo" href="gastos" aria-current="page">💸 Gastos</a>
+        <a class="btn-nav" href="finanzas">🌸 Finanzas</a>
       </nav>
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
@@ -120,6 +136,8 @@ select.inp { appearance:none; cursor:pointer; }
   </div>
   <div class="sync-status" id="sync-status">Conectando…</div>
 
+  <div class="cols cols-gastos">
+  <div class="col-main">
   <div class="form-nuevo">
     <div class="form-titulo">+ Registrar gasto</div>
     <div class="form-grid">
@@ -147,7 +165,9 @@ select.inp { appearance:none; cursor:pointer; }
 
   <div class="seccion-titulo">Por categoría este mes <span class="hint">clic para filtrar</span></div>
   <div class="cat-summary" id="cat-summary"></div>
+  </div>
 
+  <div class="col-lista">
   <div class="seccion-titulo">Todos los gastos</div>
   <div class="filtros">
     <input class="inp" id="f-busca" placeholder="Buscar por descripción o nota…"/>
@@ -157,6 +177,8 @@ select.inp { appearance:none; cursor:pointer; }
   </div>
   <div class="filtros-activos" id="filtros-activos"></div>
   <div class="lista-gastos" id="lista-gastos"></div>
+  </div>
+  </div>
 </div>
 
 <script type="module">
@@ -185,7 +207,7 @@ function protegerPagina(alEntrar) {
       if (!iniciado) { iniciado = true; alEntrar(); }
     } else {
       if (user) { try { await signOut(getAuth(app)); } catch (e) {} }
-      window.location.href = 'index.html';
+      window.location.href = './';
     }
   });
 }
@@ -432,7 +454,7 @@ document.getElementById('btn-agregar').addEventListener('click', async ()=>{
 
 // Cerrar sesión (igual en las 3 páginas)
 document.getElementById('btn-logout').addEventListener('click', async () => {
-  try { await signOut(getAuth(app)); } catch (e) {} finally { window.location.href = 'index.html'; }
+  try { await signOut(getAuth(app)); } catch (e) {} finally { window.location.href = './'; }
 });
 </script>
 </body>

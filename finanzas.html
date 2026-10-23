@@ -122,6 +122,15 @@ input[type="date"] { color-scheme:dark; }
 .panel-importar.open { display:block; }
 .importar-texto { font-size:0.8rem; color:#e8d5e5; margin-bottom:0.6rem; line-height:1.5; }
 .importar-area { min-height:140px; font-family:ui-monospace,Menlo,monospace; font-size:0.75rem; margin-bottom:8px; resize:vertical; }
+
+/* Dos columnas: la de listados ocupa 1/3 */
+.wrap { max-width:1280px; }
+.cols { display:grid; gap:18px; align-items:start; }
+.cols > div { min-width:0; }
+.cols-gastos { grid-template-columns:2fr 1fr; }
+.cols-finanzas { grid-template-columns:1fr 2fr; }
+.cols > div > .seccion-titulo:first-child { margin-top:0; }
+@media (max-width:900px) { .cols-gastos, .cols-finanzas { grid-template-columns:1fr; } }
 @media (max-width:560px) { .concepto-item { flex-wrap:wrap; padding-left:1.2rem; } .nueva-sub-campos { grid-template-columns:1fr; } }
 </style>
 </head>
@@ -159,6 +168,17 @@ input[type="date"] { color-scheme:dark; }
     <button class="btn-nueva" id="btn-importar">Guardar conceptos en Firestore</button>
   </div>
 
+  <div class="cols cols-finanzas">
+  <div class="col-lista">
+  <div class="seccion-titulo">Pendiente por pagar</div>
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-label">Total pendiente este mes</div>
+    <div class="card-valor gasto" id="total-pendiente" style="margin-bottom:0.6rem">$0</div>
+    <div id="lista-pendientes" style="display:flex;flex-direction:column;gap:5px"></div>
+  </div>
+  </div>
+
+  <div class="col-main">
   <div class="card" style="margin-bottom:1rem">
     <div class="card-label">Ingresos este mes</div>
     <div class="card-valor ingreso" id="total-ingresos" style="margin-bottom:0.6rem">$0</div>
@@ -170,12 +190,6 @@ input[type="date"] { color-scheme:dark; }
     <button class="btn-nueva" id="btn-nuevo-ingreso">+ Agregar ingreso</button>
   </div>
 
-  <div class="seccion-titulo">Pendiente por pagar</div>
-  <div class="card" style="margin-bottom:1rem">
-    <div class="card-label">Total pendiente este mes</div>
-    <div class="card-valor gasto" id="total-pendiente" style="margin-bottom:0.6rem">$0</div>
-    <div id="lista-pendientes" style="display:flex;flex-direction:column;gap:5px"></div>
-  </div>
 
   <div class="panel-cats" id="panel-cats">
     <div class="seccion-titulo">Gestionar categorías</div>
@@ -202,6 +216,8 @@ input[type="date"] { color-scheme:dark; }
       <input class="inp-nueva" id="ns-nota" placeholder="Nota (opcional)"/>
     </div>
     <button class="btn-nueva" id="btn-nueva-sub">Agregar subcategoría</button>
+  </div>
+  </div>
   </div>
 </div>
 
