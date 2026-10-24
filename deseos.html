@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deseos — Finanzas Personal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: #121016;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 1.5rem; color: #f3e8ee; min-height: 100vh;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  /* Header igual que dashboard / gastos / finanzas */
+  .header {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+    background: rgba(28, 22, 34, 0.65);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(244, 114, 182, 0.15);
+    border-radius: 16px; padding: 0.8rem 1.2rem;
+  }
+  .titulo { font-size: 1.1rem; font-weight: 700; color: #fdf2f8; }
+  .nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .nav a, .nav span {
+    font-size: 0.8rem; font-weight: 600; text-decoration: none; padding: 5px 12px; border-radius: 8px;
+    color: #fdf2f8; background: rgba(45, 30, 48, 0.7); border: 1px solid rgba(244, 114, 182, 0.25); transition: all 0.2s;
+  }
+  .nav a:hover { background: rgba(244, 114, 182, 0.2); border-color: rgba(244, 114, 182, 0.4); }
+  .nav span.actual { background: linear-gradient(135deg, #f472b6, #db2777); border-color: transparent; color: #fff; }
+  .btn-logout {
+    background: rgba(251, 113, 133, 0.12); border: 1px solid rgba(251, 113, 133, 0.35);
+    border-radius: 8px; color: #fda4af; font-size: 0.8rem; padding: 5px 12px; cursor: pointer; font-weight: 600; font-family: inherit;
+  }
+  .btn-logout:hover { background: rgba(251, 113, 133, 0.22); }
+  .sync-status { font-size: 0.68rem; color: #6b5a6a; text-align: right; margin-bottom: 0.8rem; }
+  .sync-status.ok { color: #f472b6; }
+  .sync-status.err { color: #fb7185; }
+
+  .panel { background: rgba(28, 22, 34, 0.65); border: 1px solid rgba(244, 114, 182, 0.15); border-radius: 16px; padding: 1rem; margin-bottom: 1rem; }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .inp, .sel {
+    background: rgba(45, 30, 48, 0.7); border: 1px solid rgba(244, 114, 182, 0.2); border-radius: 10px;
+    color: #f3e8ee; font-family: inherit; font-size: 0.85rem; height: 40px; padding: 0 0.8rem; outline: none;
+  }
+  .inp:focus, .sel:focus { border-color: rgba(244, 114, 182, 0.6); }
+  .inp-nombre { flex: 1 1 220px; min-width: 160px; }
+  .inp-precio { flex: 0 0 120px; }
+  .sel { cursor: pointer; }
+  .btn-add {
+    height: 40px; padding: 0 1.2rem; border: none; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(135deg, #f472b6, #db2777); color: #fff; font-family: inherit; font-weight: 700; font-size: 0.85rem;
+  }
+  .btn-add:hover { filter: brightness(1.1); }
+
+  .cats { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.8rem; }
+  .cat-btn {
+    background: rgba(45, 30, 48, 0.6); border: 1px solid rgba(244, 114, 182, 0.18); border-radius: 20px;
+    color: #b39db2; font-size: 0.74rem; padding: 4px 12px; cursor: pointer; font-family: inherit; font-weight: 600;
+  }
+  .cat-btn.active { background: rgba(244, 114, 182, 0.2); border-color: #f472b6; color: #fdf2f8; }
+
+  .resumen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .stat { background: rgba(28, 22, 34, 0.65); border: 1px solid rgba(244, 114, 182, 0.15); border-radius: 14px; padding: 0.8rem; text-align: center; }
+  .stat-num { font-size: 1.15rem; font-weight: 700; color: #fdf2f8; }
+  .stat-label { font-size: 0.68rem; color: #b39db2; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .lista { display: flex; flex-direction: column; gap: 8px; }
+  .item {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(28, 22, 34, 0.65); border: 1px solid rgba(244, 114, 182, 0.12);
+    border-left: 3px solid var(--c, #f472b6); border-radius: 12px; padding: 0.7rem 0.9rem; transition: opacity 0.2s;
+  }
+  .item.comprado { opacity: 0.45; }
+  .item.comprado .item-nombre { text-decoration: line-through; }
+  .check {
+    width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(244, 114, 182, 0.5); background: none; cursor: pointer;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff;
+  }
+  .check.done { background: #f472b6; border-color: #f472b6; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-nombre { font-size: 0.88rem; color: #fdf2f8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { display: inline-block; margin-top: 3px; font-size: 0.64rem; font-weight: 600; padding: 1px 8px; border-radius: 20px; color: var(--c); background: color-mix(in srgb, var(--c) 15%, transparent); }
+  .item-precio { font-size: 0.85rem; color: #fbcfe8; font-weight: 600; flex-shrink: 0; }
+  .btn-del { background: none; border: none; color: #6b5a6a; font-size: 1.1rem; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
+  .btn-del:hover { color: #fb7185; }
+  .empty { text-align: center; color: #6b5a6a; font-size: 0.85rem; padding: 2rem 0; }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem; }
+    .inp-precio { flex: 1 1 100px; }
+    .resumen { gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="titulo">🛍️ Lista de deseos</div>
+    <div class="nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/gastos">Gastos</a>
+      <a href="/finanzas">Finanzas</a>
+      <span class="actual">Deseos</span>
+      <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="sync-status" id="sync-status">Conectando…</div>
+
+  <div class="panel">
+    <div class="toolbar">
+      <input class="inp inp-nombre" id="inpNombre" placeholder="¿Qué quieres comprar?" maxlength="120"/>
+      <input class="inp inp-precio" id="inpPrecio" placeholder="$ precio" inputmode="numeric"/>
+      <select class="sel" id="selCat">
+        <option value="Tecnologia">Tecnología</option>
+        <option value="Ropa">Ropa</option>
+        <option value="Hogar">Hogar</option>
+        <option value="Belleza">Belleza</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <button class="btn-add" id="btnAdd">+ Agregar</button>
+    </div>
+    <div class="cats" id="cats">
+      <button class="cat-btn active" data-cat="Todos">Todos</button>
+      <button class="cat-btn" data-cat="Tecnologia">Tecnología</button>
+      <button class="cat-btn" data-cat="Ropa">Ropa</button>
+      <button class="cat-btn" data-cat="Hogar">Hogar</button>
+      <button class="cat-btn" data-cat="Belleza">Belleza</button>
+      <button class="cat-btn" data-cat="Otro">Otro</button>
+    </div>
+  </div>
+
+  <div class="resumen" id="resumen"></div>
+  <div class="lista" id="lista"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBOQcAM_qUgsr2SiDO4ZJtHSHJP25g0GSA",
+  authDomain: "finanzas-personal-12490.firebaseapp.com",
+  projectId: "finanzas-personal-12490",
+  storageBucket: "finanzas-personal-12490.firebasestorage.app",
+  messagingSenderId: "1062344169400",
+  appId: "1:1062344169400:web:75075634e2d4a416b3614d"
+};
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+// Acceso: misma sesión de Google que el dashboard. Si no hay sesión válida, vuelve al login.
+const ALLOWED_EMAIL = 'plagosh1@gmail.com';
+function protegerPagina(alEntrar) {
+  let iniciado = false;
+  onAuthStateChanged(auth, async user => {
+    if (user && user.email === ALLOWED_EMAIL) {
+      if (!iniciado) { iniciado = true; alEntrar(); }
+    } else {
+      if (user) { try { await signOut(auth); } catch (e) {} }
+      window.location.href = 'index.html';
+    }
+  });
+}
+
+const CAT = {
+  Tecnologia: { nombre: 'Tecnología', color: '#c084fc' },
+  Ropa:       { nombre: 'Ropa',       color: '#f472b6' },
+  Hogar:      { nombre: 'Hogar',      color: '#fb923c' },
+  Belleza:    { nombre: 'Belleza',    color: '#fb7185' },
+  Otro:       { nombre: 'Otro',       color: '#fcd34d' },
+};
+const $ = id => document.getElementById(id);
+const clp = n => '$' + Math.round(Number(n) || 0).toLocaleString('es-CL');
+function setSync(msg, cls = '') { const el = $('sync-status'); el.textContent = msg; el.className = 'sync-status ' + cls; }
+
+let items = [];
+let filtro = 'Todos';
+
+function render() {
+  const lista = $('lista');
+  const filtrados = filtro === 'Todos' ? items : items.filter(i => i.cat === filtro);
+  lista.innerHTML = '';
+  if (!filtrados.length) {
+    lista.innerHTML = '<div class="empty">Sin deseos por aquí todavía</div>';
+  } else {
+    filtrados.forEach(it => {
+      const c = CAT[it.cat] || CAT.Otro;
+      const row = document.createElement('div');
+      row.className = 'item' + (it.comprado ? ' comprado' : '');
+      row.style.setProperty('--c', c.color);
+
+      const chk = document.createElement('button');
+      chk.className = 'check' + (it.comprado ? ' done' : '');
+      chk.textContent = it.comprado ? '✓' : '';
+      chk.title = it.comprado ? 'Marcar pendiente' : 'Marcar comprado';
+      chk.addEventListener('click', () => toggle(it));
+
+      const info = document.createElement('div');
+      info.className = 'item-info';
+      const nom = document.createElement('div');
+      nom.className = 'item-nombre';
+      nom.textContent = it.nombre;
+      nom.title = it.nombre;
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = c.nombre;
+      info.append(nom, badge);
+
+      row.append(chk, info);
+      if (it.precio) {
+        const p = document.createElement('span');
+        p.className = 'item-precio';
+        p.textContent = clp(it.precio);
+        row.appendChild(p);
+      }
+      const del = document.createElement('button');
+      del.className = 'btn-del';
+      del.textContent = '×';
+      del.title = 'Eliminar';
+      del.addEventListener('click', () => eliminar(it));
+      row.appendChild(del);
+      lista.appendChild(row);
+    });
+  }
+
+  const pendiente = items.filter(i => !i.comprado && i.precio).reduce((a, i) => a + Number(i.precio), 0);
+  const comprados = items.filter(i => i.comprado).length;
+  $('resumen').innerHTML = `
+    <div class="stat"><div class="stat-num">${items.length}</div><div class="stat-label">deseos</div></div>
+    <div class="stat"><div class="stat-num">${comprados}</div><div class="stat-label">comprados</div></div>
+    <div class="stat"><div class="stat-num">${pendiente > 0 ? clp(pendiente) : '—'}</div><div class="stat-label">por comprar</div></div>`;
+}
+
+async function toggle(it) {
+  try { await updateDoc(doc(db, 'deseos', it.id), { comprado: !it.comprado }); }
+  catch (e) { setSync('Error al guardar: ' + e.message, 'err'); }
+}
+async function eliminar(it) {
+  if (!confirm(`¿Eliminar "${it.nombre}"?`)) return;
+  try { await deleteDoc(doc(db, 'deseos', it.id)); }
+  catch (e) { setSync('Error al eliminar: ' + e.message, 'err'); }
+}
+
+async function agregar() {
+  const nombre = $('inpNombre').value.trim();
+  if (!nombre) { $('inpNombre').focus(); return; }
+  const precio = $('inpPrecio').value.replace(/[^0-9]/g, '');
+  const cat = $('selCat').value;
+  $('inpNombre').value = ''; $('inpPrecio').value = '';
+  try { await addDoc(collection(db, 'deseos'), { nombre, precio, cat, comprado: false, creado: Date.now() }); }
+  catch (e) { setSync('Error al guardar: ' + e.message, 'err'); }
+}
+$('btnAdd').addEventListener('click', agregar);
+$('inpNombre').addEventListener('keydown', e => { if (e.key === 'Enter') agregar(); });
+// Formato de miles mientras se escribe el precio
+$('inpPrecio').addEventListener('input', e => {
+  const n = e.target.value.replace(/[^0-9]/g, '');
+  e.target.value = n ? '$' + Number(n).toLocaleString('es-CL') : '';
+});
+
+$('cats').addEventListener('click', e => {
+  const btn = e.target.closest('.cat-btn');
+  if (!btn) return;
+  filtro = btn.dataset.cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b === btn));
+  render();
+});
+
+$('btn-logout').addEventListener('click', async () => {
+  try { await signOut(auth); } catch (e) {}
+  window.location.href = 'index.html';
+});
+
+protegerPagina(() => {
+  setSync('Cargando…');
+  onSnapshot(query(collection(db, 'deseos'), orderBy('creado', 'desc')), snap => {
+    items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    setSync('✓ Sincronizado', 'ok');
+    render();
+  }, err => setSync(err.code === 'permission-denied'
+      ? 'Sin permiso: las reglas de Firestore no incluyen "deseos"'
+      : 'Sin conexión: ' + err.message, 'err'));
+});
+</script>
+</body>
+</html>
