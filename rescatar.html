@@ -23,8 +23,8 @@
   <p class="sub">Lee la colección tal como estaba a la hora que indiques (solo funciona dentro de la última hora) y la vuelve a escribir en el proyecto Finanzas con los mismos IDs.</p>
 
   <button id="btn-login">1. Entrar al proyecto Finanzas</button>
-  <label for="hora">2. Hora ANTES de borrarla (hora local, hoy)</label>
-  <input id="hora" type="time" value="15:15"/>
+  <label for="minutos">2. ¿Hace cuántos minutos estaba la colección intacta? (antes del borrado, máximo 55)</label>
+  <input id="minutos" type="number" min="1" max="55" value="20"/>
   <button id="btn-leer" disabled>3. Buscar cómo estaba</button>
   <button id="btn-restaurar" disabled>4. Restaurar</button>
   <pre id="log">Primero entra con tu cuenta.</pre>
@@ -79,16 +79,19 @@ function valor(v) {
 function campos(f) { const o = {}; for (const k in f) o[k] = valor(f[k]); return o; }
 
 $('btn-leer').addEventListener('click', async () => {
-  const [hh, mm] = $('hora').value.split(':').map(Number);
-  const t = new Date(); t.setHours(hh, mm, 0, 0);
-  const minutos = Math.round((Date.now() - t) / 60000);
-  if (minutos <= 0) { log('✗ Esa hora es futura.', true); return; }
-  if (minutos > 59) { log(`✗ Esa hora fue hace ${minutos} min. Solo se puede leer la última hora; prueba una hora más reciente (pero anterior al borrado).`, true); return; }
-
-  log(`Buscando "${COLECCION}" como estaba a las ${$('hora').value} (hace ${minutos} min)…`, true);
+  const minutos = Number($('minutos').value);
+  if (!(minutos >= 1 && minutos <= 59)) { log('✗ Usa entre 1 y 59 minutos.', true); return; }
   $('btn-leer').disabled = true;
   try {
-    const token = await auth.currentUser.getIdToken();
+    // Hora REAL: la del servidor de Google (emisión del token), no la del reloj del computador
+    const res = await auth.currentUser.getIdTokenResult(true);
+    const token = res.token;
+    const ahoraServidor = new Date(res.issuedAtTime);
+    const t = new Date(ahoraServidor.getTime() - minutos * 60000);
+    t.setSeconds(0, 0);
+    const desfase = Math.round((Date.now() - ahoraServidor) / 60000);
+    log(`Buscando "${COLECCION}" como estaba hace ${minutos} min (${t.toISOString().slice(11,16)} UTC)…` +
+        (Math.abs(desfase) >= 2 ? `\n(Tu reloj está desfasado ${desfase} min respecto del servidor; se usa la hora del servidor.)` : ''), true);
     encontrados = [];
     let pageToken = '';
     do {
